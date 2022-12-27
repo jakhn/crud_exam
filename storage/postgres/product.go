@@ -210,7 +210,7 @@ func (f *ProductRepo) Update(ctx context.Context, req *models.UpdateProduct) (in
 
 func (f *ProductRepo) Delete(ctx context.Context, req *models.ProductPrimarKey) error {
 
-	_, err := f.db.Exec(ctx, "UPDATE orders SET deleted_at = now(), is_deleted = true WHERE id = $1", req.Id)
+	_, err := f.db.Exec(ctx, "UPDATE product SET deleted_at = now(), is_deleted = true WHERE id = $1", req.Id)
 	if err != nil {
 		return err
 	}
@@ -218,78 +218,6 @@ func (f *ProductRepo) Delete(ctx context.Context, req *models.ProductPrimarKey) 
 	return nil 
 }
 
-func (uh userHandler) FilterProduct (w http.ResponseWriter, r *http.Request) {
-    users := []User{}
-    // sortBy is expected to look like field.orderdirection i. e. id.asc
-    sortBy := r.URL.Query().Get("sortBy")
-    if sortBy == "" {
-        // id.asc is the default sort query
-        sortBy = "id.asc"
-    }
-    sortQuery, err := validateAndReturnSortQuery(sortBy)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-    strLimit := r.URL.Query().Get("limit")
-    // with a value as -1 for gorms Limit method, we'll get a request without limit as default
-    limit := -1
-    if strLimit != "" {
-        limit, err = strconv.Atoi(strLimit)
-        if err != nil || limit < -1 {
-            http.Error(w, "limit query parameter is no valid number", http.StatusBadRequest)
-            return
-        }
-    }
-    strOffset := r.URL.Query().Get("offset")
-    offset := -1
-    if strOffset != "" {
-        offset, err = strconv.Atoi(strOffset)
-        if err != nil || offset < -1 {
-            http.Error(w, "offset query parameter is no valid number", http.StatusBadRequest)
-            return
-        }
-    }
-    filter := r.URL.Query().Get("filter")
-    filterMap := map[string]string{}
-    if filter != "" {
-        filterMap, err = validateAndReturnFilterMap(filter)
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusBadRequest)
-            return
-        }
-    }
-    if err := uh.db.Where(filterMap).Limit(limit).Offset(offset).Order(sortQuery).Find(&users).Error; err != nil {
-        fmt.Println(err)
-        http.Error(w, "Error on DB find for all users", http.StatusInternalServerError)
-        return
-    }
-    w.Header().Add("Content-Type", "application/json")
-    if err := json.NewEncoder(w).Encode(users); err != nil {
-        fmt.Println(err)
-        http.Error(w, "Error encoding response object", http.StatusInternalServerError)
-    }
-}
-func validateAndReturnFilterMap(filter string) (map[string]string, error) {
-    splits := strings.Split(filter, ".")
-    if len(splits) != 2 {
-        return nil, errors.New("malformed sortBy query parameter, should be field.orderdirection")
-    }
-    field, value := splits[0], splits[1]
-    if !stringInSlice(userFields, field) {
-        return nil, errors.New("unknown field in filter query parameter")
-    }
-    return map[string]string{field: value}, nil
-}
 
 
-    filter := r.URL.Query().Get("filter")
-    filterMap := map[string]string{}
-    if filter != "" {
-        filterMap, err = validateAndReturnFilterMap(filter)
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusBadRequest)
-            return
-        }
-    }
 

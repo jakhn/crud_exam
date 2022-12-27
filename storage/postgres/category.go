@@ -86,10 +86,7 @@ func (f *CategoryRepo) GetByPKey(ctx context.Context, pkey *models.CategoryPrima
 
 	queryAll := `select count(*) over() from category where parent_id=$1`
 
-	rows, err := f.db.Query(ctx, query, Id)
-	if err != nil {
-		return nil, err
-	}
+	rows, err := f.db.Query(ctx, query, pkey.Id)
 
 	for rows.Next() {
 		res := &models.CategoryByParent{}
@@ -230,7 +227,7 @@ func (f *CategoryRepo) Update(ctx context.Context, req *models.UpdateCategory) (
 
 func (f *CategoryRepo) Delete(ctx context.Context, req *models.CategoryPrimarKey) error {
 
-	_, err := f.db.Exec(ctx, "UPDATE orders SET deleted_at = now(), is_deleted = true WHERE id = $1", req.Id)
+	_, err := f.db.Exec(ctx, "UPDATE category SET deleted_at = now(), is_deleted = true WHERE id = $1", req.Id)
 	if err != nil {
 		return err
 	}

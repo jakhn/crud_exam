@@ -50,82 +50,69 @@ func (f *OrdersRepo) Create(ctx context.Context, orders *models.CreateOrders) (s
 
 	return id, nil
 }
+func (f *OrdersRepo) GetByPKey(ctx context.Context, pkey *models.OrdersPrimarKey) (*models.OrderList, error) { 
 
-func (f *OrdersRepo) GetByPKey(ctx context.Context, pkey *models.OrdersPrimarKey) (*models.Orders, error) {
-
-	
 	var (
-		respMain       = models.Ords{}
-		respChildOrd   = models.ChildOrder{}
-		respProducts   = models.Products{} 
-		offset         = " OFFSET 0"
-		limit          = " LIMIT 20"
-		categoryId     string
-	) 
+		productCategory models.ProductCategory
+		productList     models.ProductList
+		orderList       models.OrderList
+
+		orderId          sql.NullString
+		orderDescription sql.NullString
+		productId        sql.NullString
+		productName      sql.NullString
+		categoryId       sql.NullString
+		categoryName     sql.NullString
+		categoryParentId sql.NullString
+	)
 
 	query := `
 	SELECT
-	orders_id,
-	description,
-	product_id, 
+		orders.orders_id,
+		orders.description,
+		product.product_id,
+		product.product_name,
+		category.category_id,
+		category.category_name,
+		category.parent_id
 	FROM
-	orders WHERE deleted_at = 0;
+    	orders
+	JOIN product ON orders.product_id = product.product_id
+	JOIN category ON product.category_id = category.category_id
+	WHERE orders.is_deleted = false AND product.is_deleted = false AND category.is_deleted = false AND orders.orders_id = $1
 	`
-	queryPrentId := `select parent_id from category where orders_id = $1`
 
-	queryAll := `select count(*) over() from orders where orders_id = $1`
-	queryProduct := `select product_id from product where product_id = $1`
-	
+	err := f.db.QueryRow(ctx, query, pkey.Id).Scan(
+		&orderId,
+		&orderDescription,
+		&productId,
+		&productName,
+		&categoryId,
+		&categoryName,
+		&categoryParentId,
+	)
 
-	rows, err := f.db.Query(ctx, query)
-	if err != nil {
-		return nil, err
-	}
+	productCategory.Id = categoryId.String
+	productCategory.Name = categoryName.String
+	productCategory.ParentID = categoryParentId.String
 
-	for rows.Next() {
-		res := &models.Categories{}
+	productList.Id = productId.String
+	productList.Name = productName.String
+	productList.Category = productCategory
 
-		err := rows.Scan(
-			&res.CategoryId,
-			&res.CategoryName,
-			&res.ParentId,
-		)
+	orderList.Id = orderId.String
+	orderList.Description = orderDescription.String
+	orderList.Product = productList
 
-		if err != nil {
-			return nil, err
-		}
-		categoryId = res.CategoryId
-		respProducts.ProductId = res.ProductId
-		respCategoryChild.ChildsCategory = append(respCategoryChild.ChildsCategory, res)
-	}
-	err = f.db.QueryRow(ctx, queryName, categoryId).Scan(&respCategoryChild.Name)
-	if err != nil {
-		return nil, err
-	}
-	rows, err = f.db.Query(ctx, queryAll, respCategoryChild.ParentId)
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		rows.Scan(
-			&resp.Count,
-		)
-		resp.Categories = append(resp.Categories, &respCategoryChild)
-	}
-
-	return &resp, err
-}
+	return &orderList, err
 }
 
-func (f *OrdersRepo) GetList(ctx context.Context, req *models.GetListOrdersRequest) (*models.Cp, error) {
 
+func (f *OrdersRepo) GetList(ctx context.Context, req *models.GetListOrdersRequest) (*models.GetListOrdersResponse, error) {
 	var (
-		respMain       = models.Ords{}
-		respChildOrd   = models.ChildOrder{}
-		respProducts   = models.Products{} 
-		offset         = " OFFSET 0"
-		limit          = " LIMIT 20"
-		categoryId     string
+		resp   = models.GetListOrdersResponse{}
+		offset = ""
+		limit  = ""
 	)
 
 	if req.Limit > 0 {
@@ -137,53 +124,69 @@ func (f *OrdersRepo) GetList(ctx context.Context, req *models.GetListOrdersReque
 	}
 
 	query := `
+	
 	SELECT
-	orders_id,
-	description,
-	product_id, 
+		COUNT(*) OVER(),
+		orders.orders_id,
+		orders.description,
+		product.product_id,
+		product.product_name,
+		category.category_id,
+		category.category_name,
+		category.parent_id
 	FROM
-	orders WHERE deleted_at = 0;
+    	orders
+	JOIN product ON orders.product_id = products.product_id
+	JOIN category ON products.category_id = category.category_id
+	WHERE orders.is_deleted = false AND products.is_deleted = false AND categories.is_deleted = false
 	`
-	queryPrentId := `select parent_id from category where orders_id = $1`
 
-	queryAll := `select count(*) over() from orders where orders_id = $1`
-	queryProduct := `select product_id from product where product_id = $1`
 	query += offset + limit
 
 	rows, err := f.db.Query(ctx, query)
-	if err != nil {
-		return nil, err
-	}
 
 	for rows.Next() {
-		res := &models.Categories{}
+		var (
+			productCategory models.ProductCategory
+			productList     models.ProductList
 
-		err := rows.Scan(
-			&res.CategoryId,
-			&res.CategoryName,
-			&res.ParentId,
+			orderId          sql.NullString
+			orderDescription sql.NullString
+			productId        sql.NullString
+			productName      sql.NullString
+			categoryId       sql.NullString
+			categoryName     sql.NullString
+			categoryParentId sql.NullString
 		)
 
+		err := rows.Scan(
+			&resp.Count,
+			&orderId,
+			&orderDescription,
+			&productId,
+			&productName,
+			&categoryId,
+			&categoryName,
+			&categoryParentId,
+		)
 		if err != nil {
 			return nil, err
 		}
-		categoryId = res.CategoryId
-		respProducts.ProductId = res.ProductId
-		respCategoryChild.ChildsCategory = append(respCategoryChild.ChildsCategory, res)
-	}
-	err = f.db.QueryRow(ctx, queryName, categoryId).Scan(&respCategoryChild.Name)
-	if err != nil {
-		return nil, err
-	}
-	rows, err = f.db.Query(ctx, queryAll, respCategoryChild.ParentId)
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		rows.Scan(
-			&resp.Count,
-		)
-		resp.Categories = append(resp.Categories, &respCategoryChild)
+
+		productCategory.Id = categoryId.String
+		productCategory.Name = categoryName.String
+		productCategory.ParentID = categoryParentId.String
+
+		productList.Id = productId.String
+		productList.Name = productName.String
+		productList.Category = productCategory
+
+		resp.Order = append(resp.Order, &models.OrderList{
+			Id:          orderId.String,
+			Description: orderDescription.String,
+			Product:     productList,
+		})
+
 	}
 
 	return &resp, err

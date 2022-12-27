@@ -1,7 +1,5 @@
 package models
 
-import "gorm.io/plugin/soft_delete"
-
 type CategoryPrimarKey struct {
 	Id string `json:"category_id"`
 }
@@ -12,12 +10,12 @@ type CreateCategory struct {
 }
 
 type Category struct {
-	Id           string                `json:"category_id"`
-	ParentId     string                `json:"parent_id"`
-	CategoryName string                `json:"category_name"`
-	CreatedAt    string                `json:"created_at"`
-	UpdatedAt    string                `json:"updated_at"`
-	DeletedAt    soft_delete.DeletedAt `json:"gorm:"softDelete:milli""`
+	Id           string `json:"category_id"`
+	ParentId     string `json:"parent_id"`
+	CategoryName string `json:"category_name"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+	DeletedAt    string `json:"deleted_at"`
 }
 
 type UpdateCategory struct {

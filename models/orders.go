@@ -1,7 +1,5 @@
 package models
 
-import "gorm.io/plugin/soft_delete"
-
 type OrdersPrimarKey struct {
 	Id string `json:"orders_id"`
 }
@@ -12,16 +10,16 @@ type CreateOrders struct {
 }
 
 type Orders struct {
-	Id          string                `json:"orders_id"`
-	Description string                `json:"description"`
-	ProductId   string                `json:"product_id"`
-	CreatedAt   string                `json:"created_at"`
-	UpdatedAt   string                `json:"updated_at"`
-	DeletedAt   soft_delete.DeletedAt `json:"gorm:"softDelete:milli""`
+	Id          string `json:"orders_id"`
+	Description string `json:"description"`
+	ProductId   string `json:"product_id"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	DeletedAt   string `json:"deleted_at"`
 }
 
 type UpdateOrders struct {
-	Id          string `json:"category_id"`
+	Id          string `json:"orders_id"`
 	Description string `json:"description"`
 	ProductId   string `json:"product_id"`
 }
@@ -33,28 +31,21 @@ type GetListOrdersRequest struct {
 
 type GetListOrdersResponse struct {
 	Count int32     `json:"count"`
-	Order []*Orders `json:"orderss"`
+	Order []*OrderList `json:"orderss"`
 }
 
-type Ords struct {
-	Count int32         `json:"count"`
-	Order []*ChildOrder `json:"orders"`
-}
-
-type ChildOrder struct {
-	OrderId     string      `json:"order_id"`
+type OrderList struct {
+	Id          string      `json:"orders_id"`
 	Description string      `json:"description"`
-	Product     []*Products `json:"product"`
+	Product     ProductList `json:"product"`
 }
-
-type Products struct {
-	ProductId string        `json:"product_id"`
-	Name      string        `json:"name"`
-	Category  []*Categories `json:"category"`
+type ProductList struct {
+	Id       string          `json:"product_id"`
+	Name     string          `json:"name"`
+	Category ProductCategory `json:"category"`
 }
-
-type Categories struct {
-	CategoryId   string `json:"category_id"`
-	CategoryName string `json:"name"`
-	ParentId     string `json:"parent_id"`
+type ProductCategory struct {
+	Id       string `json:"category_id"`
+	Name     string `json:"name"`
+	ParentID string `json:"parent_id"`
 }
