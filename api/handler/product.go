@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"crud/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateProduct godoc
@@ -92,8 +93,9 @@ func (h *HandlerV1) GetProductById(c *gin.Context) {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Param offset query string false "offset"
-// @Param limit query string false "limit"
+// @Param offset query int false "offset"
+// @Param limit query int false "limit"
+// @Param category_id query string false "category_id"
 // @Success 200 {object} models.GetListProductResponse "GetProductBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
@@ -102,8 +104,9 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 		limit  int
 		offset int
 		err    error
+		category_id string
 	)
-
+	category_id = c.DefaultQuery("category_id", "")
 	limitStr := c.Query("limit")
 	if limitStr != "" {
 		limit, err = strconv.Atoi(limitStr)
@@ -129,6 +132,7 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 		&models.GetListProductRequest{
 			Limit:  int32(limit),
 			Offset: int32(offset),
+			CategoryId : category_id,
 		},
 	)
 
@@ -139,6 +143,7 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+
 }
 
 // UpdateProduct godoc
@@ -150,7 +155,7 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param product body models.CreateProduct true "CreateProductRequestBody"
+// @Param product body models.UpdateProductSwagger true "CreateProductRequestBody"
 // @Success 200 {object} models.Product "GetProductsBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
@@ -160,9 +165,9 @@ func (h *HandlerV1) UpdateProduct(c *gin.Context) {
 		product models.UpdateProduct
 	)
 
-	product.Id = c.Param("id")
+	id := c.Param("id")
 
-	if product.Id == "" {
+	if id == "" {
 		log.Printf("error whiling update: %v\n", errors.New("required product id").Error())
 		c.JSON(http.StatusBadRequest, errors.New("required product id").Error())
 		return
@@ -174,6 +179,8 @@ func (h *HandlerV1) UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
+
+	product.Id = id
 
 	rowsAffected, err := h.storage.Product().Update(
 		context.Background(),
@@ -194,7 +201,7 @@ func (h *HandlerV1) UpdateProduct(c *gin.Context) {
 
 	resp, err := h.storage.Product().GetByPKey(
 		context.Background(),
-		&models.ProductPrimarKey{Id: product.Id},
+		&models.ProductPrimarKey{Id: id},
 	)
 
 	if err != nil {

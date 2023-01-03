@@ -10,7 +10,15 @@ type StorageI interface {
 	CloseDB()
 	Category() CategoryRepoI
 	Product() ProductRepoI
-	Orders() OrdersRepoI
+	Order() OrderRepoI
+}
+
+type CategoryRepoI interface {
+	Create(ctx context.Context, req *models.CreateCategory) (string, error)
+	GetByPKey(ctx context.Context, req *models.CategoryPrimaryKey) (*models.CategoryList, error)
+	GetList(ctx context.Context, req *models.GetListCategoryRequest) (*models.GetListCategoryResponse, error)
+	Update(ctx context.Context, req *models.UpdateCategory) (int64, error)
+	Delete(ctx context.Context, req *models.CategoryPrimaryKey) error
 }
 
 type ProductRepoI interface {
@@ -21,18 +29,10 @@ type ProductRepoI interface {
 	Delete(ctx context.Context, req *models.ProductPrimarKey) error
 }
 
-type CategoryRepoI interface {
-	Create(ctx context.Context, req *models.CreateCategory) (string, error)
-	GetByPKey(ctx context.Context, req *models.CategoryPrimarKey) (*models.Cp, error)
-	GetList(ctx context.Context, req *models.GetListCategoryRequest) (*models.Cp, error)
-	Update(ctx context.Context, req *models.UpdateCategory) (int64, error)
-	Delete(ctx context.Context, req *models.CategoryPrimarKey) error
-}
-
-type OrdersRepoI interface {
-	Create(ctx context.Context, req *models.CreateOrders) (string, error)
-	GetByPKey(ctx context.Context, req *models.OrdersPrimarKey) (*models.OrderList, error)
-	GetList(ctx context.Context, req *models.GetListOrdersRequest) (*models.GetListOrdersResponse, error)
-	Update(ctx context.Context, req *models.UpdateOrders) (int64, error)
-	Delete(ctx context.Context, req *models.OrdersPrimarKey) error
+type OrderRepoI interface {
+	Create(ctx context.Context, req *models.CreateOrder) (string, error)
+	GetByPKey(ctx context.Context, req *models.OrderPrimarKey) (*models.OrderList, error)
+	GetList(ctx context.Context, req *models.GetListOrderRequest) (*models.GetListOrderResponse, error)
+	Update(ctx context.Context, req *models.UpdateOrder) (int64, error)
+	Delete(ctx context.Context, req *models.OrderPrimarKey) error
 }

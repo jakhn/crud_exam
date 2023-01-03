@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"crud/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateCategory godoc
@@ -42,7 +43,7 @@ func (h *HandlerV1) CreateCategory(c *gin.Context) {
 
 	resp, err := h.storage.Category().GetByPKey(
 		context.Background(),
-		&models.CategoryPrimarKey{Id: id},
+		&models.CategoryPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -72,7 +73,7 @@ func (h *HandlerV1) GetCategoryById(c *gin.Context) {
 
 	resp, err := h.storage.Category().GetByPKey(
 		context.Background(),
-		&models.CategoryPrimarKey{Id: id},
+		&models.CategoryPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -94,52 +95,53 @@ func (h *HandlerV1) GetCategoryById(c *gin.Context) {
 // @Produce json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
-// @Success 200 {object} models.Cp "GetCategoryBody"
+// @Success 200 {object} models.GetListCategoryResponse "GetCategoryBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
 func (h *HandlerV1) GetCategoryList(c *gin.Context) {
 	var (
-	  limit  int
-	  offset int
-	  err    error
+		limit  int
+		offset int
+		err    error
 	)
-  
+
 	limitStr := c.Query("limit")
 	if limitStr != "" {
-	  limit, err = strconv.Atoi(limitStr)
-	  if err != nil {
-		log.Printf("error whiling limit: %v\n", err)
-		c.JSON(http.StatusBadRequest, err.Error())
-		return
-	  }
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			log.Printf("error whiling limit: %v\n", err)
+			c.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
 	}
-  
+
 	offsetStr := c.Query("offset")
 	if offsetStr != "" {
-	  offset, err = strconv.Atoi(offsetStr)
-	  if err != nil {
-		log.Printf("error whiling limit: %v\n", err)
-		c.JSON(http.StatusBadRequest, err.Error())
-		return
-	  }
+		offset, err = strconv.Atoi(offsetStr)
+		if err != nil {
+			log.Printf("error whiling limit: %v\n", err)
+			c.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
 	}
-  
+
 	resp, err := h.storage.Category().GetList(
-	  context.Background(),
-	  &models.GetListCategoryRequest{
-		Limit:  int32(limit),
-		Offset: int32(offset),
-	  },
+		context.Background(),
+		&models.GetListCategoryRequest{
+			Limit:  int32(limit),
+			Offset: int32(offset),
+		},
 	)
-  
+
 	if err != nil {
-	  log.Printf("error whiling get list: %v", err)
-	  c.JSON(http.StatusInternalServerError, errors.New("error whiling get list").Error())
-	  return
+		log.Printf("error whiling get list: %v", err)
+		c.JSON(http.StatusInternalServerError, errors.New("error whiling get list").Error())
+		return
 	}
-  
+
 	c.JSON(http.StatusOK, resp)
-  }
+
+}
 
 // UpdateCategory godoc
 // @ID update_category
@@ -150,8 +152,8 @@ func (h *HandlerV1) GetCategoryList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param category body models.CreateCategory true "CreateCategoryRequestBody"
-// @Success 200 {object} models.Category "GetCategoriesBody"
+// @Param category body models.UpdateCategorySwagger true "CreateCategoryRequestBody"
+// @Success 200 {object} models.Category "GetCategorysBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
 func (h *HandlerV1) UpdateCategory(c *gin.Context) {
@@ -160,9 +162,9 @@ func (h *HandlerV1) UpdateCategory(c *gin.Context) {
 		category models.UpdateCategory
 	)
 
-	category.Id = c.Param("id")
+	id := c.Param("id")
 
-	if category.Id == "" {
+	if id == "" {
 		log.Printf("error whiling update: %v\n", errors.New("required category id").Error())
 		c.JSON(http.StatusBadRequest, errors.New("required category id").Error())
 		return
@@ -174,6 +176,8 @@ func (h *HandlerV1) UpdateCategory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
+
+	category.Id = id
 
 	rowsAffected, err := h.storage.Category().Update(
 		context.Background(),
@@ -194,7 +198,7 @@ func (h *HandlerV1) UpdateCategory(c *gin.Context) {
 
 	resp, err := h.storage.Category().GetByPKey(
 		context.Background(),
-		&models.CategoryPrimarKey{Id: category.Id},
+		&models.CategoryPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -229,7 +233,7 @@ func (h *HandlerV1) DeleteCategory(c *gin.Context) {
 
 	err := h.storage.Category().Delete(
 		context.Background(),
-		&models.CategoryPrimarKey{
+		&models.CategoryPrimaryKey{
 			Id: id,
 		},
 	)

@@ -10,4 +10,4 @@ migration-up:
 	migrate -path ./migrations/postgres/ -database 'postgres://jahongir:00@localhost:5432/h_database?sslmode=disable' up
 
 migration-down:
-	migrate -path ./migrations/postgres/ -database 'postgres://jahongir:00@localhost:5432/h_database?sslmode=disable' down 
+	migrate -path ./migrations/postgres/ -database 'postgres://jahongir:00@localhost:5432/h_database?sslmode=disable' down

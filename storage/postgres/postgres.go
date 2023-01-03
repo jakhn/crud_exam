@@ -14,7 +14,7 @@ type Store struct {
 	db       *pgxpool.Pool
 	category *CategoryRepo
 	product  *ProductRepo
-	orders   *OrdersRepo
+	order    *OrderRepo
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -41,7 +41,7 @@ func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, erro
 		db:       pool,
 		category: NewCategoryRepo(pool),
 		product:  NewProductRepo(pool),
-		orders:   NewOrdersRepo(pool),
+		order:    NewOrderRepo(pool),
 	}, err
 }
 
@@ -67,11 +67,11 @@ func (s *Store) Product() storage.ProductRepoI {
 	return s.product
 }
 
-func (s *Store) Orders() storage.OrdersRepoI {
+func (s *Store) Order() storage.OrderRepoI {
 
-	if s.orders == nil {
-		s.orders = NewOrdersRepo(s.db)
+	if s.order == nil {
+		s.order = NewOrderRepo(s.db)
 	}
 
-	return s.orders
+	return s.order
 }

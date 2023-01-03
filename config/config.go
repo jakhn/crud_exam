@@ -9,6 +9,14 @@ type Config struct {
 	PostgresPassword       string
 	PostgresPort           string
 	PostgresMaxConnections int32
+
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
+
+	AuthSecretKey string
+	SuperAdmin    string
+	Client        string
 }
 
 func Load() Config {

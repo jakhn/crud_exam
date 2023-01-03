@@ -1,61 +1,91 @@
 definitions:
+  models.Categories:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      order_list:
+        items:
+          $ref: '#/definitions/models.OrderList'
+        type: array
+      parent_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
   models.Category:
     properties:
-      category_id:
-        type: string
-      category_name:
-        type: string
       created_at:
+        type: string
+      id:
+        type: string
+      name:
         type: string
       parent_id:
         type: string
       updated_at:
         type: string
     type: object
-  models.CategoryByParent:
+  models.CategoryList:
     properties:
+      childs:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      created_at:
+        type: string
       id:
         type: string
       name:
         type: string
       parent_id:
         type: string
-    type: object
-  models.ChildCategory:
-    properties:
-      child:
-        items:
-          $ref: '#/definitions/models.CategoryByParent'
-        type: array
-      id:
+      updated_at:
         type: string
-      name:
-        type: string
-    type: object
-  models.Cp:
-    properties:
-      categories:
-        items:
-          $ref: '#/definitions/models.ChildCategory'
-        type: array
-      count:
-        type: integer
     type: object
   models.CreateCategory:
     properties:
-      category_name:
+      name:
         type: string
       parent_id:
+        type: string
+    type: object
+  models.CreateOrder:
+    properties:
+      description:
+        type: string
+      product_id:
         type: string
     type: object
   models.CreateProduct:
     properties:
       category_id:
         type: string
-      price:
-        type: integer
-      product_name:
+      name:
         type: string
+      price:
+        type: number
+    type: object
+  models.GetListCategoryResponse:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/models.CategoryList'
+        type: array
+      count:
+        type: integer
+    type: object
+  models.GetListOrderResponse:
+    properties:
+      count:
+        type: integer
+      orders:
+        items:
+          $ref: '#/definitions/models.OrderList'
+        type: array
     type: object
   models.GetListProductResponse:
     properties:
@@ -66,20 +96,86 @@ definitions:
           $ref: '#/definitions/models.Product'
         type: array
     type: object
+  models.Order:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      product_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.OrderList:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      product:
+        $ref: '#/definitions/models.ProductList'
+      updated_at:
+        type: string
+    type: object
   models.Product:
     properties:
       category_id:
         type: string
       created_at:
         type: string
-      price:
-        type: integer
-      product_id:
+      deleted_at:
         type: string
-      product_name:
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  models.ProductList:
+    properties:
+      category:
+        $ref: '#/definitions/models.Categories'
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
         type: string
       updated_at:
         type: string
+    type: object
+  models.UpdateCategorySwagger:
+    properties:
+      name:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  models.UpdateOrderSwagger:
+    properties:
+      description:
+        type: string
+      product_id:
+        type: string
+    type: object
+  models.UpdateProductSwagger:
+    properties:
+      category_id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
     type: object
 info:
   contact: {}
@@ -105,7 +201,7 @@ paths:
         "200":
           description: GetCategoryBody
           schema:
-            $ref: '#/definitions/models.Cp'
+            $ref: '#/definitions/models.GetListCategoryResponse'
         "400":
           description: Invalid Argument
           schema:
@@ -222,12 +318,12 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/models.CreateCategory'
+          $ref: '#/definitions/models.UpdateCategorySwagger'
       produces:
       - application/json
       responses:
         "200":
-          description: GetCategoriesBody
+          description: GetCategorysBody
           schema:
             $ref: '#/definitions/models.Category'
         "400":
@@ -241,6 +337,163 @@ paths:
       summary: Update Category
       tags:
       - Category
+  /order:
+    get:
+      consumes:
+      - application/json
+      description: Get List Order
+      operationId: get_list_order
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetOrderBody
+          schema:
+            $ref: '#/definitions/models.GetListOrderResponse'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Get List Order
+      tags:
+      - Order
+    post:
+      consumes:
+      - application/json
+      description: Create Order
+      operationId: create_order
+      parameters:
+      - description: CreateOrderRequestBody
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrder'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: GetorderBody
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Create Order
+      tags:
+      - Order
+  /order/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete By Id Order
+      operationId: delete_by_id_order
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetOrderBody
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Delete By Id Order
+      tags:
+      - Order
+    get:
+      consumes:
+      - application/json
+      description: Get By Id Order
+      operationId: get_by_id_order
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetOrderBody
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Get By Id Order
+      tags:
+      - Order
+    put:
+      consumes:
+      - application/json
+      description: Update Order
+      operationId: update_order
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: CreateOrderRequestBody
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateOrderSwagger'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetordersBody
+          schema:
+            $ref: '#/definitions/models.Order'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Update Order
+      tags:
+      - Order
   /product:
     get:
       consumes:
@@ -251,10 +504,14 @@ paths:
       - description: offset
         in: query
         name: offset
-        type: string
+        type: integer
       - description: limit
         in: query
         name: limit
+        type: integer
+      - description: category_id
+        in: query
+        name: category_id
         type: string
       produces:
       - application/json
@@ -379,7 +636,7 @@ paths:
         name: product
         required: true
         schema:
-          $ref: '#/definitions/models.CreateProduct'
+          $ref: '#/definitions/models.UpdateProductSwagger'
       produces:
       - application/json
       responses:
