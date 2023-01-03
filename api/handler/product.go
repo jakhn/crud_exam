@@ -93,9 +93,8 @@ func (h *HandlerV1) GetProductById(c *gin.Context) {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Param offset query int false "offset"
-// @Param limit query int false "limit"
-// @Param category_id query string false "category_id"
+// @Param offset query string false "offset"
+// @Param limit query string false "limit"
 // @Success 200 {object} models.GetListProductResponse "GetProductBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
@@ -104,9 +103,8 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 		limit  int
 		offset int
 		err    error
-		category_id string
 	)
-	category_id = c.DefaultQuery("category_id", "")
+
 	limitStr := c.Query("limit")
 	if limitStr != "" {
 		limit, err = strconv.Atoi(limitStr)
@@ -132,7 +130,6 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 		&models.GetListProductRequest{
 			Limit:  int32(limit),
 			Offset: int32(offset),
-			CategoryId : category_id,
 		},
 	)
 

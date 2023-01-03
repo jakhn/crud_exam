@@ -6,13 +6,13 @@ type OrderPrimarKey struct {
 
 type CreateOrder struct {
 	Description string `json:"description"`
-	ProductId   string `json:"product_id"`
+	Product_id  string `json:"product_id"`
 }
 
 type Order struct {
 	Id          string `json:"id"`
 	Description string `json:"description"`
-	ProductId   string `json:"product_id"`
+	Product_id  string `json:"product_id"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
 	DeletedAt   string `json:"deleted_at"`
@@ -20,45 +20,37 @@ type Order struct {
 
 type UpdateOrderSwagger struct {
 	Description string `json:"description"`
-	ProductId   string `json:"product_id"`
+	Product_id  string `json:"product_id"`
 }
 
 type UpdateOrder struct {
 	Id          string `json:"id"`
 	Description string `json:"description"`
-	ProductId   string `json:"product_id"`
+	Product_id  string `json:"product_id"`
 }
 
 type GetListOrderRequest struct {
-	Limit      int32
-	Offset     int32
-	CategoryId string
+	Limit  int32
+	Offset int32
 }
 
 type GetListOrderResponse struct {
-	Count  int          `json:"count"`
-	Orders []*OrderList `json:"orders"`
+	Count  int         `json:"count"`
+	Orders []OrderList `json:"orders"`
 }
 
 type OrderList struct {
-	Id          string       `json:"id"`
-	Description string       `json:"description"`
-	Product     *ProductList `json:"product"`
-	CreatedAt   string       `json:"created_at"`
-	UpdatedAt   string       `json:"updated_at"`
+	Id          string      `json:"id"`
+	Description string      `json:"description"`
+	Product     ProductList `json:"product"`
 }
 type ProductList struct {
-	Id        string      `json:"id"`
-	Name      string      `json:"name"`
-	Category  *Categories `json:"category"`
-	CreatedAt string      `json:"created_at"`
-	UpdatedAt string      `json:"updated_at"`
+	Id       string          `json:"id"`
+	Name     string          `json:"name"`
+	Category ProductCategory `json:"category"`
 }
-type Categories struct {
-	Id        string       `json:"id"`
-	Name      string       `json:"name"`
-	ParentID  string       `json:"parent_id"`
-	CreatedAt string       `json:"created_at"`
-	UpdatedAt string       `json:"updated_at"`
-	Order     []*OrderList `json:"order_list"`
+type ProductCategory struct {
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	ParentID string `json:"parent_id"`
 }

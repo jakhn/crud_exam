@@ -34,9 +34,8 @@ type UpdateProduct struct {
 }
 
 type GetListProductRequest struct {
-	Limit      int32
-	Offset     int32
-	CategoryId string
+	Limit  int32
+	Offset int32
 }
 
 type GetListProductResponse struct {

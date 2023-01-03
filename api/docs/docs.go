@@ -502,21 +502,15 @@ const docTemplate = `{
                 "operationId": "get_list_product",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "offset",
                         "name": "offset",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "limit",
                         "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "category_id",
-                        "name": "category_id",
                         "in": "query"
                     }
                 ],
@@ -729,32 +723,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.Categories": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "order_list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.OrderList"
-                    }
-                },
-                "parent_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Category": {
             "type": "object",
             "properties": {
@@ -905,9 +873,6 @@ const docTemplate = `{
         "models.OrderList": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -916,9 +881,6 @@ const docTemplate = `{
                 },
                 "product": {
                     "$ref": "#/definitions/models.ProductList"
-                },
-                "updated_at": {
-                    "type": "string"
                 }
             }
         },
@@ -948,22 +910,30 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ProductList": {
+        "models.ProductCategory": {
             "type": "object",
             "properties": {
-                "category": {
-                    "$ref": "#/definitions/models.Categories"
-                },
-                "created_at": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "updated_at": {
+                "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProductList": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/models.ProductCategory"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

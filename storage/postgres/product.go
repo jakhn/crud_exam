@@ -74,7 +74,7 @@ func (f *ProductRepo) GetByPKey(ctx context.Context, pkey *models.ProductPrimarK
 			updated_at
 		FROM
 			products
-		WHERE id = $1 AND deleted_at IS NULL
+		WHERE products.deleted_at IS NULL AND id = $1
 	`
 
 	err := f.db.QueryRow(ctx, query, pkey.Id).
@@ -105,17 +105,17 @@ func (f *ProductRepo) GetList(ctx context.Context, req *models.GetListProductReq
 
 	var (
 		resp   = models.GetListProductResponse{}
-		params = make(map[string]interface{})
-		filter string
+		offset = ""
+		limit  = ""
 	)
 
-	params["limit"] = req.Limit
-	params["offset"] = req.Offset
-	params["id"] = req.CategoryId
-	filter += ` and category_id = :id`
+	if req.Limit > 0 {
+		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
+	}
 
-	fmt.Println("category -> ", req.CategoryId)
-	fmt.Println("filter => ", filter)
+	if req.Offset > 0 {
+		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
+	}
 
 	query := `
 		SELECT
@@ -128,9 +128,11 @@ func (f *ProductRepo) GetList(ctx context.Context, req *models.GetListProductReq
 			updated_at
 		FROM
 			products
-		WHERE deleted_at IS NULL 
-		` + filter
-	fmt.Println("query => ", query)
+		WHERE products.deleted_at IS NULL
+	`
+
+	query += offset + limit
+
 	rows, err := f.db.Query(ctx, query)
 
 	for rows.Next() {
@@ -187,7 +189,7 @@ func (f *ProductRepo) Update(ctx context.Context, req *models.UpdateProduct) (in
 			price = :price,
 			category_id = :category_id,
 			updated_at = now()
-		WHERE id = :id AND deleted_at IS NULL
+		WHERE id = :id
 	`
 
 	params = map[string]interface{}{

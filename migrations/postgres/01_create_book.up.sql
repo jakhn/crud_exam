@@ -1,4 +1,3 @@
-
 CREATE TABLE categories (
     id UUID PRIMARY KEY NOT NULL,
     name VARCHAR NOT NULL UNIQUE,

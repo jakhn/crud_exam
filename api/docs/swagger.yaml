@@ -1,21 +1,4 @@
 definitions:
-  models.Categories:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      order_list:
-        items:
-          $ref: '#/definitions/models.OrderList'
-        type: array
-      parent_id:
-        type: string
-      updated_at:
-        type: string
-    type: object
   models.Category:
     properties:
       created_at:
@@ -113,16 +96,12 @@ definitions:
     type: object
   models.OrderList:
     properties:
-      created_at:
-        type: string
       description:
         type: string
       id:
         type: string
       product:
         $ref: '#/definitions/models.ProductList'
-      updated_at:
-        type: string
     type: object
   models.Product:
     properties:
@@ -141,17 +120,22 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.ProductList:
+  models.ProductCategory:
     properties:
-      category:
-        $ref: '#/definitions/models.Categories'
-      created_at:
-        type: string
       id:
         type: string
       name:
         type: string
-      updated_at:
+      parent_id:
+        type: string
+    type: object
+  models.ProductList:
+    properties:
+      category:
+        $ref: '#/definitions/models.ProductCategory'
+      id:
+        type: string
+      name:
         type: string
     type: object
   models.UpdateCategorySwagger:
@@ -504,14 +488,10 @@ paths:
       - description: offset
         in: query
         name: offset
-        type: integer
+        type: string
       - description: limit
         in: query
         name: limit
-        type: integer
-      - description: category_id
-        in: query
-        name: category_id
         type: string
       produces:
       - application/json
